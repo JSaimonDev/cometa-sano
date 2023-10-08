@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id               Int         @id @default(autoincrement())
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  title            String      @unique @db.VarChar()
+  content          String
+  description      String
+  featuredImage    String      @db.VarChar(255)
+  altFeaturedImage String
+  category         Category    @relation(fields: [categoryId], references: [id])
+  categoryId       Int
+  subcategory      Subcategory @relation(fields: [subcategoryId], references: [id])
+  subcategoryId    Int
+  tags             Tag[]
+}
+
+model Category {
+  id            Int           @id @default(autoincrement())
+  name          String        @unique @db.VarChar()
+  posts         Post[]
+  subcategories Subcategory[]
+}
+
+model Subcategory {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar()
+  posts      Post[]
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique @db.VarChar()
+  posts Post[]
+}
