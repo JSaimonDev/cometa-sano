@@ -12,17 +12,12 @@ const upload = multer({
 
 export const routes = (app: Express): void => {
   app.get('/api/post', (req, res) => {
-    // app.get('/', (req, res) => {
     const category = typeof req.query.category === 'string' ? req.query.category : undefined
     const query: ReqPost = {
       take: Number(req.query.take),
       skip: Number(req.query.skip),
       category
     }
-
-    // res.status(400).send({
-    //   errors: [{ message: 'The cursor is nor provided'} ]
-    // })
 
     getPostList(query)
       .then(postList => {

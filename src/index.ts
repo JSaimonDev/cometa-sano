@@ -21,14 +21,15 @@ routes(app)
 
 // TODO: Check if it is necessary (cors)
 
-app.use((req, res, next) => {
-  if (req.body.apiKey === config.API_KEY) {
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-  }
-  next()
-})
+// this didn't seem to be doing anything. Create a prover API_KEY validation
+// app.use((req, res, next) => {
+//   if (req.body.apiKey === config.API_KEY) {
+//     res.setHeader('Access-Control-Allow-Origin', '*')
+//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+//     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+//   }
+//   next()
+// })
 
 app.listen(config.PORT, () => {
   console.log('Viviendo healthy listening in port 3000')
