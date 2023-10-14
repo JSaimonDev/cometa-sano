@@ -15,5 +15,10 @@ export interface QueryData {
         name?: boolean
       }
     }
+    subcategory?: {
+      select?: {
+        name?: boolean
+      }
+    }
   }
 }

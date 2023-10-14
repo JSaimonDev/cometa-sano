@@ -66,6 +66,11 @@ export const getPostListQuery = async (req: ReqPost): Promise<Post[] | undefined
           select: {
             name: true
           }
+        },
+        subcategory: {
+          select: {
+            name: true
+          }
         }
       }
     }

@@ -14,7 +14,6 @@ const window = new JSDOM('').window
 const DOMPurify = createDOMPurify(window)
 
 export const updateOrCreatePost = async (newPost: CommandPost, file: Express.Multer.File): Promise<Post | undefined> => {
-  console.log('ping')
   try {
     if (newPost.content !== undefined) {
       // featured image

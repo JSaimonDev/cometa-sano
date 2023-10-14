@@ -12,7 +12,7 @@ const upload = multer({
 
 const router = express.Router()
 
-router.get('', (req, res) => {
+router.get('/', (req, res) => {
   const category = typeof req.query.category === 'string' ? req.query.category : undefined
   const query: ReqPost = {
     take: Number(req.query.take),
@@ -30,7 +30,7 @@ router.get('', (req, res) => {
     })
 })
 
-router.get(':id', (req, res) => {
+router.get('/:id', (req, res) => {
   const id = req.params.id
 
   getPostById(id)
@@ -43,7 +43,11 @@ router.get(':id', (req, res) => {
     })
 })
 
-router.post('', upload.single('featuredImage'), (req, res) => {
+router.post('/', upload.single('featuredImage'), (req, res) => {
+  if (req.file === undefined) {
+    console.error('Request missing featured image')
+    res.status(400).send('Missing featured image')
+  }
   if (req.file != null) {
     updateOrCreatePost(req.body, req.file)
       .then(createdPost => {
@@ -56,7 +60,7 @@ router.post('', upload.single('featuredImage'), (req, res) => {
   }
 })
 
-router.delete('delete/:id', (req, res) => {
+router.delete('/delete/:id', (req, res) => {
   deletePost(Number(req.params.id))
     .then(postIsDeleted => {
       res.send(postIsDeleted)

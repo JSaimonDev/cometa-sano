@@ -34,6 +34,7 @@ export interface ReqPost {
   skip: number
   take: number
   category?: string
+  subcategory?: string
 }
 
 export interface QueryPost {
