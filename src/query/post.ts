@@ -1,10 +1,30 @@
 import { type Post, PrismaClient } from '@prisma/client'
 import { type ReqPost } from '../types'
 import { type QueryData } from './types'
+import { throwNewError } from '../utils'
 
 const prisma = new PrismaClient()
 
-export const findPost = async (title: string): Promise<Post | null> => {
+export const getPostByIdQuery = async (id: string): Promise<Post | undefined | null> => {
+  try {
+    return await prisma.post.findUnique({
+      where: {
+        id: Number(id)
+      },
+      include: {
+        category: {
+          select: {
+            name: true
+          }
+        }
+      }
+    })
+  } catch (e) {
+    throwNewError('Error getting post from database', e)
+  }
+}
+
+export const getPostByTitleQuery = async (title: string): Promise<Post | null | undefined> => {
   try {
     const foundPost = await prisma.post.findUnique({
       where: {
@@ -13,26 +33,27 @@ export const findPost = async (title: string): Promise<Post | null> => {
     })
     return foundPost
   } catch (e) {
-    console.error('Error finding post', e)
-    return null
+    throwNewError('Error getting post from database', e)
   }
 }
 
-export const getPostCount = async (): Promise<number | null> => {
+export const getPostCountQuery = async (): Promise<number | null | undefined> => {
   try {
     return await prisma.post.count()
   } catch (e) {
-    console.error('Counting posts', e)
-    return null
+    throwNewError('Error getting post count from database', e)
   }
 }
 
-export const getPostListFromDb = async (req: ReqPost): Promise<Post[]> => {
+export const getPostListQuery = async (req: ReqPost): Promise<Post[] | undefined> => {
   try {
     const queryData: QueryData = {
       where: {
         category: {
-          name: req.category
+          name: {
+            equals: req.category,
+            mode: 'insensitive'
+          }
         }
       },
       take: req.take,
@@ -56,10 +77,6 @@ export const getPostListFromDb = async (req: ReqPost): Promise<Post[]> => {
 
     return postList
   } catch (e) {
-    if (e instanceof Error) {
-      throw new Error(e.message)
-    } else {
-      throw new Error('An unknown error occurred getting post list from the database')
-    }
+    throwNewError('Error getting post list from database', e)
   }
 }

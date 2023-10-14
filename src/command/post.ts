@@ -1,10 +1,10 @@
 import { type Post, PrismaClient } from '@prisma/client'
 import { type CommandPost } from '../types'
-import { fieldsInObject, commaStringToArray } from '../utils'
+import { fieldsInObject, commaStringToArray, throwNewError } from '../utils'
 
 const prisma = new PrismaClient()
 
-export const createPostInDb = async (post: CommandPost): Promise<Post | undefined> => {
+export const createPostCommand = async (post: CommandPost): Promise<Post | undefined> => {
   let tagsArray
   if (post.tags !== undefined) tagsArray = commaStringToArray(post.tags)
   const createData: any = ({
@@ -39,7 +39,8 @@ export const createPostInDb = async (post: CommandPost): Promise<Post | undefine
         }
       },
       featuredImage: post.featuredImage,
-      altFeaturedImage: post.altFeaturedImage
+      altFeaturedImage: post.altFeaturedImage,
+      altContent: post.altContent
     }
   })
   if (tagsArray !== undefined && tagsArray.length > 0) {
@@ -59,11 +60,11 @@ export const createPostInDb = async (post: CommandPost): Promise<Post | undefine
     }
     return await prisma.post.create(createData)
   } catch (e) {
-    console.error('Prisma error', e)
+    throwNewError('Error creating post in database', e)
   }
 }
 
-export const updatePostInDb = async (post: CommandPost, id: number): Promise<Post | undefined> => {
+export const updatePostCommand = async (post: CommandPost, id: number): Promise<Post | undefined> => {
   let tagsArray
   if (post.tags !== undefined) tagsArray = commaStringToArray(post.tags)
   const updateData: any = ({
@@ -122,20 +123,18 @@ export const updatePostInDb = async (post: CommandPost, id: number): Promise<Pos
     }
     return await prisma.post.update(updateData)
   } catch (e) {
-    console.error('Prisma error', e)
+    throwNewError('Error updating post in database', e)
   }
 }
 
-export const deletePostInDb = async (id: number): Promise<boolean> => {
+export const deletePostCommand = async (id: number): Promise<Post | undefined> => {
   try {
-    await prisma.post.delete({
+    return await prisma.post.delete({
       where: {
         id
       }
     })
-    return true
   } catch (e) {
-    console.error('Prisma error', e)
-    return false
+    throwNewError('Error deleting post in database', e)
   }
 }

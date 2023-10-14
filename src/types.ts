@@ -24,6 +24,7 @@ export interface CommandPost {
   description: string
   featuredImage?: string
   altFeaturedImage?: string
+  altContent: string
   category?: string
   subcategory?: string
   tags?: string

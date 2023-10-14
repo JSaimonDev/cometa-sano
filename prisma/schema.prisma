@@ -19,6 +19,7 @@ model Post {
   description      String
   featuredImage    String      @db.VarChar(255)
   altFeaturedImage String
+  altContent       String
   category         Category    @relation(fields: [categoryId], references: [id])
   categoryId       Int
   subcategory      Subcategory @relation(fields: [subcategoryId], references: [id])

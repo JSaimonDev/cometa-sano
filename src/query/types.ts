@@ -1,7 +1,7 @@
 export interface QueryData {
   where?: {
     category?: {
-      name?: string
+      name?: any // mode not included in types for some reason
     }
   }
   take?: number
