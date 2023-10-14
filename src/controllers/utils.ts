@@ -1,7 +1,13 @@
 import { fileNameToS3Url, uploadFileS3 } from '../lib/s3'
+import { type CommandPost } from '../types'
 import { commaStringToArray, getFileExtension, throwNewError } from '../utils'
+import createDOMPurify from 'dompurify'
+import { JSDOM } from 'jsdom'
 
-export const extractAndSaveImg = async (html: string, path: string, title: string, altString: string | undefined = undefined): Promise<string> => {
+const window = new JSDOM('').window
+const DOMPurify = createDOMPurify(window)
+
+export const extractAndSaveImg = async (html: string, title: string, altString: string | undefined = undefined): Promise<string> => {
   const regex = /<img[^>]*src="([^"]*base64[^"]*)"[^>]*>/gi
   let outputHtml = html
 
@@ -58,4 +64,18 @@ export const createOrUpdateFeaturedImage = async (file: Express.Multer.File, tit
   } catch (e) {
     throwNewError('Error creating or updating featured image', e)
   }
+}
+
+export const manageImages = async (post: CommandPost, featuredImageFile: Express.Multer.File | undefined): Promise<CommandPost> => {
+  // featured image
+  if (featuredImageFile != null) {
+    post.featuredImage = await createOrUpdateFeaturedImage(featuredImageFile, post.title)
+  }
+
+  // content images
+  if (post.content !== undefined) {
+    const noBase64Html = await extractAndSaveImg(post.content, post.title, post.altContent)
+    post.content = DOMPurify.sanitize(noBase64Html)
+  }
+  return post
 }

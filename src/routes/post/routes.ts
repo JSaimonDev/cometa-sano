@@ -1,5 +1,5 @@
 import express from 'express'
-import { deletePost, getPostById, getPostList, updateOrCreatePost } from '../../controllers/postController'
+import { deletePost, getPostById, getPostList, createPost, updatePost } from '../../controllers/postController'
 import { type ReqPost } from '../../types'
 import multer from 'multer'
 
@@ -49,7 +49,7 @@ router.post('/', upload.single('featuredImage'), (req, res) => {
     res.status(400).send('Missing featured image')
   }
   if (req.file != null) {
-    updateOrCreatePost(req.body, req.file)
+    createPost(req.body, req.file)
       .then(createdPost => {
         res.send(createdPost)
       })
@@ -58,6 +58,19 @@ router.post('/', upload.single('featuredImage'), (req, res) => {
         res.status(500).send('Error saving the post')
       })
   }
+})
+
+router.put('/:id', upload.single('featuredImage'), (req, res) => {
+  const id = req.params.id
+  const fileToSend = req.file ?? undefined
+  updatePost(req.body, id, fileToSend)
+    .then(createdPost => {
+      res.send(createdPost)
+    })
+    .catch(e => {
+      console.error(e)
+      res.status(500).send('Error saving the post')
+    })
 })
 
 router.delete('/delete/:id', (req, res) => {

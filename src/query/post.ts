@@ -16,6 +16,11 @@ export const getPostByIdQuery = async (id: string): Promise<Post | undefined | n
           select: {
             name: true
           }
+        },
+        subcategory: {
+          select: {
+            name: true
+          }
         }
       }
     })

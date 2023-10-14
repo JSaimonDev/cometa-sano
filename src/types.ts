@@ -19,6 +19,7 @@ export interface CreatePost {
 }
 
 export interface CommandPost {
+  id: string
   title: string
   content?: string
   description: string

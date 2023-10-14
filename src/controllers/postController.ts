@@ -1,39 +1,35 @@
 import { type Post } from '@prisma/client'
 import { type ReqPost, type CommandPost } from '../types'
 import dotenv from 'dotenv'
-import createDOMPurify from 'dompurify'
-import { JSDOM } from 'jsdom'
 import { throwNewError } from '../utils'
 import { updatePostCommand, createPostCommand, deletePostCommand } from '../command/post'
-import { getPostByTitleQuery, getPostByIdQuery, getPostCountQuery, getPostListQuery } from '../query/post'
-import { createOrUpdateFeaturedImage, extractAndSaveImg } from './utils'
+import { getPostByIdQuery, getPostCountQuery, getPostListQuery } from '../query/post'
+import { manageImages } from './utils'
 
 dotenv.config()
 
-const window = new JSDOM('').window
-const DOMPurify = createDOMPurify(window)
-
-export const updateOrCreatePost = async (newPost: CommandPost, file: Express.Multer.File): Promise<Post | undefined> => {
+export const createPost = async (newPost: CommandPost, file: Express.Multer.File): Promise<Post | undefined> => {
   try {
     if (newPost.content !== undefined) {
-      // featured image
-      newPost.featuredImage = await createOrUpdateFeaturedImage(file, newPost.title)
-
-      // content images
-      const noBase64Html = await extractAndSaveImg(newPost.content, `public/images/posts/${newPost.title}/`, newPost.title, newPost.altContent)
-      newPost.content = DOMPurify.sanitize(noBase64Html)
-
-      const postFound = await getPostByTitleQuery(newPost.title)
-      let post
-      if (postFound != null) {
-        post = await updatePostCommand(newPost, postFound.id)
-      } else {
-        post = await createPostCommand(newPost)
-      }
-      return post
+      newPost = await manageImages(newPost, file)
+      return await createPostCommand(newPost)
+    } else {
+      throw new Error('Missing content')
     }
   } catch (e) {
     throwNewError('Error creating or updating a post', e)
+  }
+}
+
+export const updatePost = async (newPost: CommandPost, id: string, file: Express.Multer.File | undefined): Promise<Post | undefined> => {
+  const postFound = await getPostById(id)
+  if (postFound != null) {
+    if (newPost.content !== undefined) {
+      newPost = await manageImages(newPost, file)
+    }
+    return await updatePostCommand(newPost, postFound.id)
+  } else {
+    throw new Error('Post not found')
   }
 }
 

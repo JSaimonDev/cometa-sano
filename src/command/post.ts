@@ -53,7 +53,7 @@ export const createPostCommand = async (post: CommandPost): Promise<Post | undef
       })
     }
   }
-  const missingFields = fieldsInObject(post, ['title', 'content', 'category', 'subcategory'])
+  const missingFields = fieldsInObject(post, ['title', 'content', 'category', 'subcategory', 'description', 'featuredImage', 'altFeaturedImage'])
   try {
     if (missingFields.length > 0) {
       throw new Error(`Missing fields: ${JSON.stringify(missingFields)}`)
@@ -100,11 +100,15 @@ export const updatePostCommand = async (post: CommandPost, id: number): Promise<
           }
         }
       },
-      featuredImage: post.featuredImage,
       altFeaturedImage: post.altFeaturedImage
     }
   }
   )
+
+  if ('featureImage' in post && post.featuredImage !== undefined) {
+    console.log('ping featured', post.featuredImage)
+    updateData.featuredImage = post.featuredImage
+  }
 
   if (tagsArray !== undefined && tagsArray.length > 0) {
     updateData.data.tags = {
@@ -116,7 +120,7 @@ export const updatePostCommand = async (post: CommandPost, id: number): Promise<
       })
     }
   }
-  const missingFields = fieldsInObject(post, ['title', 'content', 'category', 'subcategory'])
+  const missingFields = fieldsInObject(post, ['title', 'content', 'category', 'subcategory', 'description', 'featuredImage', 'altFeaturedImage'])
   try {
     if (missingFields.length > 0) {
       throw new Error(`Missing fields: ${JSON.stringify(missingFields)}`)
