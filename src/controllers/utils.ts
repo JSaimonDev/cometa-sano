@@ -8,45 +8,42 @@ const window = new JSDOM('').window
 const DOMPurify = createDOMPurify(window)
 
 export const extractAndSaveImg = async (html: string, title: string, altString: string | undefined = undefined): Promise<string> => {
-  const regex = /<img[^>]*src="([^"]*base64[^"]*)"[^>]*>/gi
-  let outputHtml = html
-
+  // Create a new instance of JSDOM with the provided HTML string
+  // This will allow us to manipulate the HTML as a document object model (DOM)
+  const dom = new JSDOM(html)
+  const document = dom.window.document
   let altArray
   if (altString !== undefined) altArray = commaStringToArray(altString)
 
+  const images = document.getElementsByTagName('img')
   try {
-    const matches = [...outputHtml.matchAll(regex)]
+    for (let i = 0; i < images.length; i++) {
+      const img = images[i]
+      const src = img.getAttribute('src')
+      if (src !== null) {
+        const typeMatch = src.match(/data:image\/(\w+);/)
 
-    for (let i = 0; i < matches.length; i++) {
-      const base64Image = matches[i][1]
+        if (typeMatch != null && typeMatch.length > 1) {
+          const imageType = typeMatch[1]
+          const imageData = src.replace(`data:image/${imageType};base64,`, '')
+          const imageBuffer = Buffer.from(imageData, 'base64')
 
-      // We remove the "data:image/...;base64," part of the base64 image source
-      const imageData = base64Image.replace(/^data:image\/\w+;base64,/, '')
-
-      // We convert the base64 image data into a binary buffer
-      const imageBuffer = Buffer.from(imageData, 'base64')
-
-      // We extract the image type (e.g., "png", "jpg") from the base64 image source
-      const typeMatch = base64Image.match(/data:image\/(\w+);/)
-
-      if (typeMatch != null && typeMatch.length > 1) {
-        const imageType = typeMatch[1]
-        const fileName = `${title}-${i}.${imageType}`
-        const uploadedImage = uploadFileS3(fileName, imageBuffer)
-        if (uploadedImage !== undefined && altArray !== undefined) {
-          const imgTagRegex = new RegExp(`<img[^>]*src="data:image/${imageType};base64,([^"]*)"[^>]*>`, 'gi')
-          const imageUrl = fileNameToS3Url(fileName)
-          const finalImageTag = `<img src='${imageUrl}' alt='${altArray[i]}'/>`
-          // We create a regular expression that matches <img> tags with the same base64 image source.
-          // This was the problem of the previous function, which created a regex of the whole encoded img
-          outputHtml = outputHtml.replace(imgTagRegex, finalImageTag)
+          const fileName = `${title}-${i}.${imageType}`
+          const uploadedImage = await uploadFileS3(fileName, imageBuffer)
+          if (uploadedImage !== undefined && altArray !== undefined) {
+            const imageUrl = fileNameToS3Url(fileName)
+            img.setAttribute('src', imageUrl)
+            img.setAttribute('alt', altArray[i])
+          }
         }
       }
     }
+
+    html = dom.serialize()
   } catch (e) {
     throwNewError('Error extracting and saving embed image', e)
   }
-  return outputHtml
+  return html
 }
 
 export const createOrUpdateFeaturedImage = async (file: Express.Multer.File, title: string): Promise<string | undefined> => {
