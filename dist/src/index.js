@@ -4,14 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const route_1 = require("./routes/route");
+const routes_1 = __importDefault(require("./routes/post/routes"));
+const cors_1 = __importDefault(require("cors"));
+const config_1 = __importDefault(require("./config"));
 const app = (0, express_1.default)();
-const PORT = 3000;
-app.use(express_1.default.json());
-(0, route_1.routes)(app);
-app.get('/', (req, res) => {
-    res.end('Hello world');
-});
-app.listen(PORT, () => {
-    console.log('Viviendo healthy listening in port 3000');
+app.use(express_1.default.json({ limit: '5mb' }));
+app.use(express_1.default.urlencoded({ limit: '5mb', extended: true }));
+app.use((0, cors_1.default)());
+app.use('/api/post', routes_1.default);
+app.listen(config_1.default.PORT, () => {
+    console.log(`Sano sanote listening in port ${config_1.default.PORT}`);
 });

@@ -10,6 +10,7 @@ CREATE TABLE "Post" (
     "altFeaturedImage" TEXT NOT NULL,
     "categoryId" INTEGER NOT NULL,
     "subcategoryId" INTEGER NOT NULL,
+    "altContent" TEXT NOT NULL,
 
     CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
 );
