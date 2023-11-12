@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for sanosanote-api on 2023-10-08T22:00:17+07:00
+# fly.toml app configuration file generated for curadoensalud-api on 2023-10-08T22:00:17+07:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "sanosanote-api"
+app = "curadoensalud-api"
 primary_region = "mad"
 
 [deploy]
